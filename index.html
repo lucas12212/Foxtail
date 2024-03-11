@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <!DOCTYPE html>
+  <html lang="en">
+  <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Video Interaction Adventure - Test</title>
+      <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <div id="fullscreenContainer">
+      <div id="videoContainer" style="display: flex;">
+          <video id="mainVideo" controls style="max-width: 90%; max-height: 80vh;">
+              <source src="Clips/01-16.mp4" type="video/mp4">
+              Your browser does not support the video tag.
+          </video>
+      </div>
+      <div id="choiceContainer" style="display: flex;">
+          <img id="choiceImage" src="Clips/Q1.jpg" alt="Decision Point" style="max-width: 90%; max-height: 80vh;">
+      </div>
+    </div>
+  </body>
+  </html>
+  
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const mainVideo = document.getElementById("mainVideo");
+        const choiceContainer = document.getElementById("choiceContainer");
+        const choiceImage = document.getElementById("choiceImage");
+        const videoContainer = document.getElementById("videoContainer");
+
+        let afterQ1 = false; // Indicates whether the Q1 decision has been made
+        let afterQ2 = false; // Indicates whether the Q2 decision has been made
+        let afterQ3 = false; // Indicates whether the Q3 decision has been made
+
+        // Expanded sequences to include Part 3
+        let sequences = {
+          initial: ["Clips/01-16.mp4", "Clips/17-18.mp4"],
+          afterQ1OptionA: [
+            "Clips/19-27.mp4",
+            "Clips/28-38.mp4",
+            "Clips/40-66.mp4",
+            "Clips/67-84.mp4",
+            "Clips/85-86.mp4",
+          ],
+          afterQ1OptionB: [
+            "Clips/28-38.mp4",
+            "Clips/19-27.mp4",
+            "Clips/40-66.mp4",
+            "Clips/67-84.mp4",
+            "Clips/85-86.mp4",
+          ],
+          afterQ2OptionA: [
+            "Clips/87-93.mp4",
+            "Clips/94-101.mp4",
+            "Clips/103-105.mp4",
+          ],
+          afterQ2OptionB: [
+            "Clips/94-101.mp4",
+            "Clips/87-93.mp4",
+            "Clips/103-105.mp4",
+          ],
+          afterQ3OptionA: [
+            "Clips/106-109.mp4",
+            "Clips/110-115.mp4",
+            "Clips/116-120.mp4",
+          ],
+          afterQ3OptionB: [
+            "Clips/110-115.mp4",
+            "Clips/106-109.mp4",
+            "Clips/116-120.mp4",
+          ],
+        };
+
+        let currentSequence = sequences.initial;
+        let currentIndex = 0;
+
+        function enterFullScreen() {
+          const fullscreenContainer = document.getElementById('fullscreenContainer');
+          if (fullscreenContainer.requestFullscreen) {
+              fullscreenContainer.requestFullscreen();
+          } else if (fullscreenContainer.webkitRequestFullscreen) { /* Safari */
+              fullscreenContainer.webkitRequestFullscreen();
+          } else if (fullscreenContainer.msRequestFullscreen) { /* IE11 */
+              fullscreenContainer.msRequestFullscreen();
+          }
+        }
+
+        // Example: entering fullscreen on video play or via a specific user action
+        mainVideo.addEventListener('play', enterFullScreen);
+
+
+        function playSequence() {
+          if (currentSequence && currentIndex < currentSequence.length) {
+            // Ensure the container and video are visible
+            videoContainer.style.display = "flex";
+            mainVideo.style.display = "flex";
+
+            mainVideo.src = currentSequence[currentIndex];
+            mainVideo.controls = true; // Reinforce controls for each new video
+            mainVideo.load();
+            mainVideo.play();
+          } else {
+            // Deciding what to show based on what has already been shown
+            if (!afterQ1) {
+              showDecisionPoint("Q1.jpg");
+            } else if (!afterQ2) {
+              showDecisionPoint("Q2.jpg");
+            } else if (!afterQ3) {
+              showDecisionPoint("Q3.jpg");
+            } else {
+              console.log("Narrative complete.");
+              // Optionally, handle the complete end of the narrative
+            }
+          }
+        }
+
+        mainVideo.onended = function () {
+          currentIndex++;
+          playSequence();
+        };
+
+        function showDecisionPoint(imageName) {
+          mainVideo.style.display = "none"; // Hide the video player
+          videoContainer.style.display = "none"; // Or set to 'flex' if it should remain in the layout
+          choiceContainer.style.display = "flex"; // Make the choice container visible
+          choiceImage.src = `Clips/${imageName}`;
+        }
+
+        choiceImage.onclick = function (event) {
+          const rect = choiceImage.getBoundingClientRect();
+          const width = rect.right - rect.left;
+          const clickPosition = event.clientX - rect.left;
+
+          choiceContainer.style.display = "flex";
+          videoContainer.style.display = "flex"; // Ensure this is set correctly
+
+          if (!afterQ1 && choiceImage.src.includes("Q1.jpg")) {
+            afterQ1 = true; // Mark that a decision after Q1 has been made
+            console.log("Choice made at Q1");
+            if (clickPosition < width / 2) {
+              currentSequence = sequences.afterQ1OptionA; // User chooses A
+            } else {
+              currentSequence = sequences.afterQ1OptionB; // User chooses B
+            }
+            console.log("Decision after Q1, sequence:", currentSequence);
+          } else if (
+            afterQ1 &&
+            !afterQ2 &&
+            choiceImage.src.includes("Q2.jpg")
+          ) {
+            afterQ2 = true; // Mark that a decision after Q2 has been made
+            console.log("Choice made at Q2");
+            if (clickPosition < width / 2) {
+              currentSequence = sequences.afterQ2OptionA; // User chooses A
+            } else {
+              currentSequence = sequences.afterQ2OptionB; // User chooses B
+            }
+            console.log("Decision after Q2, sequence:", currentSequence);
+          } else if (
+            afterQ2 &&
+            !afterQ3 &&
+            choiceImage.src.includes("Q3.jpg")
+          ) {
+            afterQ3 = true; // Mark that a decision after Q3 has been made, indicating the narrative is moving towards its conclusion
+            console.log("Choice made at Q3");
+            if (clickPosition < width / 2) {
+              currentSequence = sequences.afterQ3OptionA; // User chooses A
+            } else {
+              currentSequence = sequences.afterQ3OptionB; // User chooses B
+            }
+            console.log("Decision after Q3, sequence:", currentSequence);
+          }
+
+          currentIndex = 0; // Reset index for the new sequence
+          playSequence(); // Start playing the chosen sequence
+        };
+
+        playSequence(); // Start the initial sequence
+      });
+    </script>
+  </body>
+</html>

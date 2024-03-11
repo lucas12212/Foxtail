@@ -1,0 +1,38 @@
+body {
+  margin: 0; /* Remove default margin */
+  padding: 0; /* Remove default padding */
+  background-color: black; /* Set background color to black */
+}
+
+#fullscreenContainer {
+  position: relative; /* For z-index to take effect */
+}
+
+#choiceContainer {
+  position: absolute;
+  z-index: 1000; /* Ensure it's above other content */
+  /* Other styling to position the container appropriately */
+}
+
+
+#videoContainer, #choiceContainer {
+  display: flex;
+  justify-content: center; 
+  align-items: center;
+  height: 100vh; 
+  width: 100%; 
+}
+
+#mainVideo {
+  width: auto; /* Adjust as necessary */
+  height: auto; /* Adjust for maintaining aspect ratio */
+  max-width: 90%;
+  max-height: 80vh;
+}
+
+
+video, img {
+  max-width: 90%;
+  max-height: 80vh;
+  object-fit: contain;
+}
